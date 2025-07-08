@@ -236,9 +236,7 @@ set runtimepath+=~/.vim/plugged/buffereze
 
 " Godot-VIM
 
-" let g:godot_executable = '/mnt/c/Users/Cluts/Downloads/Godot_v4.4-stable_win64.exe/Godot_v4.4-stable_win64.exe'
-" let g:godot_run_detached = 1
-let g:godot_executable = 'cmd.exe /mnt/c/Users/Cluts/Downloads/Godot_v4.4-stable_win64.exe/Godot_v4.4-stable_win64.exe'
+let g:godot_executable = 'cmd.exe /YourPathToGodot/Godot.exe'
 
 let g:godot_run_detached = 1
 
@@ -247,25 +245,16 @@ let g:godot_run_detached = 1
 
 
 func! GodotSettings() abort
-
 	setlocal foldmethod=expr
-
 	setlocal tabstop=4
-
 	nnoremap <buffer> <F4> :GodotRunLast<CR>
-
 	nnoremap <buffer> <F5> :GodotRun<CR>
-
 	nnoremap <buffer> <F6> :GodotRunCurrent<CR>
-
 	nnoremap <buffer> <F7> :GodotRunFZF<CR>
-
 endfunc
 
 augroup godot | au!
-
 	au FileType gdscript call GodotSettings()
-
 augroup end
 
 " Detect .dtl files as 'dialogic'
@@ -281,18 +270,13 @@ au BufRead,BufNewFile *.dtl set filetype=dialogic
 
 
 set t_Co=256
-
 set termguicolors
 
 
 if !has('gui_running') && &term =~ '^\%(screen\|tmux\)'
-
 	let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-
 	let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-
 endif
-
 
 colorscheme default  
 
