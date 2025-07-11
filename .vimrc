@@ -160,6 +160,8 @@ Plug 'vimsence/vimsence'
 Plug 'jupyter-vim/jupyter-vim'
 Plug 'tomasiser/vim-code-dark'
 Plug 'V1337Q/Schatten-VIM'
+Plug 'V1337Q/VIM-Diagnostic-Lines'
+Plug 'dense-analysis/ale'
 call plug#end()
 
 
@@ -236,25 +238,32 @@ set runtimepath+=~/.vim/plugged/buffereze
 
 " Godot-VIM
 
-let g:godot_executable = 'cmd.exe /YourPathToGodot/Godot.exe'
+" let g:godot_executable = '/mnt/c/Users/Cluts/Downloads/Godot_v4.4-stable_win64.exe/Godot_v4.4-stable_win64.exe'
+" let g:godot_run_detached = 1
+let g:godot_executable = 'cmd.exe /mnt/c/Users/Cluts/Downloads/Godot_v4.4-stable_win64.exe/Godot_v4.4-stable_win64.exe'
 
 let g:godot_run_detached = 1
 
-
-
-
-
 func! GodotSettings() abort
+
 	setlocal foldmethod=expr
+
 	setlocal tabstop=4
+
 	nnoremap <buffer> <F4> :GodotRunLast<CR>
+
 	nnoremap <buffer> <F5> :GodotRun<CR>
+
 	nnoremap <buffer> <F6> :GodotRunCurrent<CR>
+
 	nnoremap <buffer> <F7> :GodotRunFZF<CR>
+
 endfunc
 
 augroup godot | au!
+
 	au FileType gdscript call GodotSettings()
+
 augroup end
 
 " Detect .dtl files as 'dialogic'
@@ -270,18 +279,269 @@ au BufRead,BufNewFile *.dtl set filetype=dialogic
 
 
 set t_Co=256
+
 set termguicolors
 
 
 if !has('gui_running') && &term =~ '^\%(screen\|tmux\)'
+
 	let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+
 	let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
 endif
+
 
 colorscheme default  
 
 syntax on
-colorscheme schatten
+" colorscheme schatten
+" let g:airline_theme = 'base16_gruvbox_dark_soft'
+colorscheme tokyonight
 
-let g:airline_theme = 'base16_gruvbox_dark_soft'
+let g:loaded_airline = 1
+let g:airline_loaded = 1
+set laststatus=2
 
+
+
+" function! RecolorMode(mode)
+" 	if a:mode == 'n'
+" 		hi ModeText ctermfg=6       ctermbg=0       cterm=NONE
+" 	elseif a:mode == 'i'
+" 		hi ModeText ctermfg=1       ctermbg=0       cterm=NONE
+" 	elseif a:mode == 'R'
+" 		hi ModeText ctermfg=2       ctermbg=0       cterm=NONE
+" 	elseif a:mode == 'v' || a:mode == 'V' || a:mode == '^V'
+" 		hi ModeText ctermfg=3       ctermbg=0       cterm=NONE
+" 	elseif a:mode == 'c'
+" 		hi ModeText ctermfg=4       ctermbg=0       cterm=NONE
+" 	elseif a:mode == 't'
+" 		hi ModeText ctermfg=5       ctermbg=0       cterm=NONE
+" 	endif
+
+" 	return ''
+" endfunction
+function! CocStatus()
+	return get(g:, 'coc_status', '')
+endfunction
+set statusline+=%{CocStatus()}
+
+function! RecolorMode(mode)
+	if a:mode == 'n'
+		hi ModeText guifg=#449dab       guibg=#111119       cterm=NONE
+	elseif a:mode == 'i'
+		hi ModeText guifg=#f7768e       guibg=#111119       cterm=NONE
+	elseif a:mode == 'R'
+		hi ModeText guifg=#9ece6a       guibg=#111119       cterm=NONE
+	elseif a:mode == 'v' || a:mode == 'V' || a:mode == '^V'
+		hi ModeText guifg=#e0af68       guibg=#111119       cterm=NONE
+	elseif a:mode == 'c'
+		hi ModeText guifg=#7aa2f7       guibg=#111119       cterm=NONE
+	elseif a:mode == 't'
+		hi ModeText guifg=#ad8ee6       guibg=#111119       cterm=NONE
+	endif
+
+	return ''
+endfunction
+
+function! SymbolMode(modified)
+endfunction
+
+function! SetFiletype(filetype)
+	if a:filetype == ''
+		return 'unknown'
+	else
+		return a:filetype
+	endif
+endfunction
+
+function! HandleColumnGap()
+	let l:col = col('.')
+
+	" if l:col > 9
+	" 	return '✖  '
+	" else
+	" 	return '✖  '
+	" endif
+	if l:col > 9
+		return '✖  '
+	else
+		return '✖  '
+	endif
+
+endfunction
+
+function! GetBranchName()
+	let l:dir = expand('%:h')
+	if empty(finddir('.git', l:dir . ';'))
+		return 'no-git'
+	endif
+	return trim(system('git -C ' . shellescape(l:dir) . ' branch --show-current 2>/dev/null'))
+endfunction
+
+" function! GitDirty()
+"   let l:dir = expand('%:p:h')
+"   if empty(finddir('.git', l:dir . ';'))
+"     return ''
+"   endif
+"   let l:status = system('git -C ' . shellescape(l:dir) . ' status --porcelain 2>/dev/null')
+"   return empty(l:status) ? '' : '✗'
+" endfunction
+
+hi StatusLine       guifg=#1a1b26    guibg=NONE    cterm=NONE
+hi StatusLineNC     guifg=NONE    guibg=NONE    cterm=NONE
+
+hi Separator        guifg=#111119       guibg=#1a1b26    cterm=NONE
+hi Separator2       guifg=#ff9e64       guibg=#111119       cterm=NONE
+hi PathText         guifg=#ad8ee6       guibg=#111119       cterm=NONE
+hi FileText         guifg=#acb0d0       guibg=#111119       cterm=NONE
+hi FiletypeText     guifg=#ff9e64       guibg=#111119       cterm=NONE
+
+hi LineText         guifg=#ff7a92       guibg=#111119       cterm=NONE
+hi ColumnText       guifg=#7da6ff       guibg=#111119       cterm=NONE
+
+hi PercentageText   guifg=#7aa2f7       guibg=#111119       cterm=NONE
+hi TotalLineText    guifg=#ad8ee6       guibg=#111119       cterm=NONE
+
+hi BranchNameText   guifg=#b9f27c       guibg=#111119       cterm=NONE
+hi BranchIDText     guifg=#ff9e64       guibg=#111119       cterm=NONE
+
+set statusline  =%{RecolorMode(mode())}
+
+set statusline +=%#Separator# 
+set statusline +=%#ModeText#\ 
+set statusline +=%#Separator# 
+set statusline +=%#PathText#\ %{expand('%:p:h:t')}\ 
+set statusline +=%#Separator# 
+set statusline +=%#FileText#\ %t
+set statusline +=%#Separator# 
+
+set statusline +=%=
+
+set statusline +=%#Separator# 
+set statusline +=%#FiletypeText#%{SetFiletype(&filetype)}
+set statusline +=%#Separator#\ 
+
+set statusline +=%#Separator# 
+" set statusline+=%{GitDirty()}
+set statusline +=%#BranchNameText#%{GetBranchName()}
+set statusline +=%#Separator#\ 
+
+set statusline +=%#Separator# 
+set statusline +=%#LineText#%2l\ 
+set statusline +=%#Separator2#%{HandleColumnGap()}
+set statusline +=%#ColumnText#%2c\ 
+set statusline +=%#Separator#
+set statusline +=%#PercentageText#\ %P\ 
+set statusline +=%#Separator2#\ 
+set statusline +=%#TotalLineText#%L
+set statusline +=%#Separator#
+
+" set statusline +=%#Separator# 
+" set statusline +=%#ModeText#󰊠\ 
+" set statusline +=%#Separator# 
+" set statusline +=%#PathText#\ %{expand('%:p:h:t')}\ 
+" set statusline +=%#Separator#
+" set statusline +=%#FileText#\ %t
+" set statusline +=%#Separator# 
+
+" set statusline +=%=
+
+" set statusline +=%#Separator# 
+" set statusline +=%#FiletypeText#%{SetFiletype(&filetype)}
+" set statusline +=%#Separator#\ 
+
+" set statusline +=%#Separator# 
+" set statusline +=%#BranchNameText#%{GetBranchName()}
+" set statusline +=%#Separator#\ 
+
+" set statusline +=%#Separator# 
+" set statusline +=%#LineText#%2l\ 
+" set statusline +=%#Separator2#%{HandleColumnGap()}
+" set statusline +=%#ColumnText#%2c\ 
+" set statusline +=%#Separator#
+" set statusline +=%#PercentageText#\ %P\ 
+" set statusline +=%#Separator2#\ 
+" set statusline +=%#TotalLineText#%L
+" set statusline +=%#Separator#
+
+sign define CocErrorSign   text=✘ texthl=CocErrorSign
+sign define CocWarningSign text=▲ texthl=CocWarningSign
+sign define CocInfoSign    text= texthl=CocInfoSign
+
+" Define custom signs with different symbols
+sign define CocErrorSign   text=│ texthl=CocErrorSign
+sign define CocWarningSign text=│ texthl=CocWarningSign
+sign define CocInfoSign    text=│ texthl=CocInfoSign
+sign define CocHintSign    text=│ texthl=CocHintSign
+
+highlight CocErrorSign   guifg=#ff5f5f ctermfg=Red
+highlight CocWarningSign guifg=#ffaa00 ctermfg=Yellow
+highlight CocInfoSign    guifg=#00afff ctermfg=Blue
+highlight CocHintSign    guifg=#5fffff ctermfg=Cyan
+
+augroup CocCustomSigns
+	autocmd!
+	autocmd User CocNvimInit call s:define_coc_signs()
+augroup END
+
+function! s:define_coc_signs()
+	sign define CocErrorSign   text=│ texthl=CocErrorSign
+	sign define CocWarningSign text=│ texthl=CocWarningSign
+	sign define CocInfoSign    text=│ texthl=CocInfoSign
+	sign define CocHintSign    text=│ texthl=CocHintSign
+endfunction
+
+let g:ale_sign_error = '│'
+let g:ale_sign_warning = '│'
+highlight ALEErrorSign    guibg=#1a1b26 ctermfg=Red    ctermbg=DarkGray
+highlight ALEWarningSign    guibg=#1a1b26 
+" highlight ALEErrorSign    guifg=#FF0000 guibg=#2E3440 ctermfg=Red    ctermbg=DarkGray
+
+sign define CocError text=✖ texthl=CocErrorSign
+sign define CocWarning text=⚠ texthl=CocWarningSign
+sign define CocInfo text=ℹ texthl=CocInfoSign
+sign define CocHint text=➤ texthl=CocHintSign
+
+let g:coc_status_signs = {
+	      \ 'error': '✖',
+      \ 'warning': '⚠',
+      \ 'info': 'ℹ',
+      \ 'hint': '➤',
+      \ 'ok': '✓'  
+      \ }
+
+sign define ALEGoodLine text=\│ texthl=ALEGoodLineSign
+highlight ALEGoodLineSign guifg=#00FF00 ctermfg=Green guibg=NONE ctermbg=NONE
+
+function! UpdateALELineSigns()
+	if !exists('g:ale_enabled') || !g:ale_enabled || !buflisted('%')
+		return
+	endif
+
+	let l:buf = bufnr('%')
+	let l:all_issues = ale#buffer#GetLoclist(l:buf)
+
+	silent! execute 'sign unplace * group=ALEGoodLineGroup buffer=' . l:buf
+
+	let l:bad_lines = {}
+	for issue in l:all_issues
+		let l:bad_lines[issue.lnum] = 1
+	endfor
+
+	for lnum in range(1, line('$'))
+		if !has_key(l:bad_lines, lnum)
+			execute 'sign place ' . lnum . ' line=' . lnum . 
+						\ ' name=ALEGoodLine group=ALEGoodLineGroup buffer=' . l:buf
+		endif
+	endfor
+endfunction
+
+augroup ALELineSigns
+	autocmd!
+	autocmd User ALELintPost,ALEFixPost call UpdateALELineSigns()
+	autocmd CursorHold,CursorHoldI,BufEnter * call UpdateALELineSigns()
+augroup END
+
+set signcolumn=yes
